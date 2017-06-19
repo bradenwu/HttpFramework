@@ -3,13 +3,17 @@ package com.pace.test;
 
 import android.content.Intent;
 
-import com.pace.httpframework.core.HttpClientFactory;
+import com.pace.httpframework.apachehttp.ApacheHttpClient;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.params.HttpParams;
 
 public class Test {
     public static void invoke() {
-        HttpClientFactory factory = HttpClientFactory.getInstance();
+        HttpParams params = null;
+        HttpPost post = null;
+        new ApacheHttpClient().execute(params, post);
 
     }
 
@@ -34,7 +38,7 @@ public class Test {
          */
         public <T> T getObject(int i) throws InstantiationException, IllegalAccessException {
             // 创建泛型对象
-//            T t = c.newInstance();
+            // T t = c.newInstance();
             return null;
         }
     }

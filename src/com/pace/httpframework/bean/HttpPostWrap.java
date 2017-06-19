@@ -46,6 +46,10 @@ public class HttpPostWrap implements Serializable {
         return mHeaders;
     }
 
+    public void setBody(byte[] _body) {
+        body = _body;
+    }
+
     public byte[] getBody() {
         return body;
     }

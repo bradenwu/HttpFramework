@@ -4,7 +4,7 @@ package com.pace.httpframework.bean;
 import java.io.Serializable;
 import java.util.HashMap;
 
-public class HttpResponseWrap<T> implements Serializable {
+public class HttpResponseWrap implements Serializable {
     /**
      * 
      */
@@ -12,15 +12,6 @@ public class HttpResponseWrap<T> implements Serializable {
     private int statusCode = 0;
     private HashMap<String, String> mHeaders = null;
     private byte[] mBody = null;
-    private T mResponse = null;
-
-    public HttpResponseWrap(T t) {
-        mResponse = t;
-    }
-
-    public T get() {
-        return mResponse;
-    }
 
     public HttpResponseWrap(int code, HashMap<String, String> headers, byte[] rspBytes) {
         statusCode = code;
