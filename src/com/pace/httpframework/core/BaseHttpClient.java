@@ -16,7 +16,7 @@ public abstract class BaseHttpClient<Rsp, Param, Post> implements IHttpClient<Rs
 
     @Override
     public Rsp execute(Param param, Post post) {
-        IBaseChannel channel = (mHttpRouter == null ? null : mHttpRouter.getAvailableChannel());
+        IBaseChannel channel = (mHttpRouter == null ? null : mHttpRouter.getSelectChannel());
         if (channel != null) {
             return transmitHttpChannel(channel, param, post);
         }
