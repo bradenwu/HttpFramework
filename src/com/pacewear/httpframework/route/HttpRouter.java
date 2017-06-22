@@ -4,6 +4,7 @@ package com.pacewear.httpframework.route;
 import com.pacewear.httpframework.channel.IHttpProxyChannel;
 import com.pacewear.httpframework.core.IHttpClient;
 import com.pacewear.httpframework.okhttp.OkHttpClientImpl;
+import com.tencent.tws.api.HttpPackage;
 
 public class HttpRouter implements IHttpRouter {
 
@@ -19,9 +20,9 @@ public class HttpRouter implements IHttpRouter {
     }
 
     @Override
-    public IHttpClient getSelectHttpClient() {
-
-        return new OkHttpClientImpl();
+    public IHttpClient getSelectHttpClient(HttpPackage e) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

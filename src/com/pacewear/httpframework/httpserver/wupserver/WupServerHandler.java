@@ -4,7 +4,6 @@ package com.pacewear.httpframework.httpserver.wupserver;
 import android.content.Context;
 import android.util.Log;
 
-import com.pacewear.httpframework.httpserver.IServerHandlerListener;
 import com.pacewear.httpframework.httpserver.ServerHandler;
 import com.qq.jce.wup.UniPacket;
 
@@ -58,6 +57,7 @@ public class WupServerHandler extends ServerHandler {
                 Log.d(TAG, "ServerHandler");
             }
         };
+        mQRomComponentWupManager.setHttpClient(new WupHttpClient());
         mQRomComponentWupManager.startup(context);
     }
 

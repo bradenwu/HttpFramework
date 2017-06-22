@@ -11,8 +11,6 @@ import com.pacewear.httpframework.log.HttpLog;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import qrom.component.wup.base.utils.ZipUtils;
-
 /**
  * @author baodingzhou
  */

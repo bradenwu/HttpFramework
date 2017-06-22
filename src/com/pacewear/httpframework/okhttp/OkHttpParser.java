@@ -27,16 +27,26 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 // bt通道走正常的http请求，转换为okhttp请求
-public class OkHttpUtil {
+public class OkHttpParser {
     private static final String TAG = "OkHttpUtil";
-    private OkHttpClient.Builder mBuilder = null;
 
-    public OkHttpUtil() {
-        mBuilder = new OkHttpClient.Builder();
+    public static OkHttpClient.Builder getClientBuilderFromPacket(HttpPackage e1) {
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+        HttpRequestGeneralParams param = HttpRequestGeneralParams
+                .StringToHttpRequestGeneralParams(e1.mHttpData);
+        RequstConvert.parseHttpParam(builder, param, param.mMaskFlag);
+        return builder;
     }
 
-    public void syncCall(HttpPackage e1) {
-        Response response = callInternal(e1);
+    public static Request getRequestFromPacket(HttpPackage e1) {
+        HttpRequestGeneralParams param = HttpRequestGeneralParams
+                .StringToHttpRequestGeneralParams(e1.mHttpData);
+        Request.Builder requestBuilder = new Request.Builder();
+        RequstConvert.parseHttpRequest(requestBuilder, param, param.mMaskFlag);
+        return requestBuilder.build();
+    }
+
+    public static void onParseResponse(Response response, HttpPackage e1) {
         switch (e1.mPackageType) {
             case HttpRequestCommand.GET_WITH_STREAMRETURN:
             case HttpRequestCommand.POST_WITH_STRAMRETURN:
@@ -63,18 +73,48 @@ public class OkHttpUtil {
         }
     }
 
-    private String onParseInputStream(Response response) {
+    private static String onParseInputStream(Response response) {
         ResponseBody body = response.body();
         byte[] bs = ByteUtil.toBytes(body.byteStream());
         return Base64.encodeToString(bs, Base64.DEFAULT);
     }
 
-    private String onParseCommonResponse(Response response) {
+    private static String onParseCommonResponse(Response response) {
         Headers headers = response.headers();
         String strBody = "";
         try {
             strBody = response.body().string();
-            return EncodeHttpResonse(headers, strBody);
+
+            // encode HttpResponce into jsonobject
+            JSONObject jsonObject = new JSONObject();// main object
+            JSONObject jsonHead = new JSONObject();
+            for (int i = 0; i < headers.size(); i++) {
+                try {
+                    jsonHead.put(headers.name(i), headers.value(i));
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                jsonObject.put("ResponseHead", jsonHead);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                Log.i(TAG, "put responseHead error");
+            }
+
+            try {
+                jsonObject.put("ResponseBody", strBody);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                Log.i(TAG, "put responseBody error");
+            }
+
+            return jsonObject.toString();
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -82,7 +122,7 @@ public class OkHttpUtil {
         return "";
     }
 
-    private void onParseDownloadRsp(HttpPackage e1, Response response) {
+    private static void onParseDownloadRsp(HttpPackage e1, Response response) {
         InputStream is = null;
         byte[] buf = new byte[2048];
         int len = 0;
@@ -118,58 +158,5 @@ public class OkHttpUtil {
             } catch (IOException e) {
             }
         }
-    }
-
-    private Response callInternal(HttpPackage e1) {
-        HttpRequestGeneralParams param = HttpRequestGeneralParams
-                .StringToHttpRequestGeneralParams(e1.mHttpData);
-        RequstConvert.parseHttpParam(mBuilder, param, param.mMaskFlag);
-        OkHttpClient client = mBuilder.build();
-        Request.Builder requestBuilder = new Request.Builder();
-        RequstConvert.parseHttpRequest(requestBuilder, param, param.mMaskFlag);
-        try {
-            Response response = client.newCall(requestBuilder.build()).execute();
-            // 解析response
-            if (response.isSuccessful()) {
-                e1.mStatusCode = -1;
-                return response;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String EncodeHttpResonse(Headers headers, String strBody) {
-        // encode HttpResponce into jsonobject
-
-        JSONObject jsonObject = new JSONObject();// main object
-        JSONObject jsonHead = new JSONObject();
-        for (int i = 0; i < headers.size(); i++) {
-            try {
-                jsonHead.put(headers.name(i), headers.value(i));
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        try {
-            jsonObject.put("ResponseHead", jsonHead);
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.i(TAG, "put responseHead error");
-        }
-
-        try {
-            jsonObject.put("ResponseBody", strBody);
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.i(TAG, "put responseBody error");
-        }
-
-        return jsonObject.toString();
     }
 }

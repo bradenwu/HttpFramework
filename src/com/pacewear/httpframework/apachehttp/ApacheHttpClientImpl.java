@@ -1,9 +1,6 @@
 
 package com.pacewear.httpframework.apachehttp;
 
-import com.pacewear.httpframework.bean.HttpParamWrap;
-import com.pacewear.httpframework.bean.HttpPostWrap;
-import com.pacewear.httpframework.bean.HttpResponseWrap;
 import com.pacewear.httpframework.core.BaseHttpClient;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseResult;
@@ -41,6 +38,8 @@ public class ApacheHttpClientImpl
     @Override
     protected HttpRequestGeneralParams prepareRequest(HttpParams param, HttpPost request) {
         // TODO Auto-generated method stub
+        HttpRequestGeneralParams target = new HttpRequestGeneralParams();
+        
         return null;
     }
 
