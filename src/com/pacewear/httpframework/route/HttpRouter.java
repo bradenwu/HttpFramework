@@ -1,7 +1,9 @@
 
 package com.pacewear.httpframework.route;
 
-import com.pacewear.httpframework.channel.IBaseChannel;
+import com.pacewear.httpframework.channel.IHttpProxyChannel;
+import com.pacewear.httpframework.core.IHttpClient;
+import com.pacewear.httpframework.okhttp.OkHttpClientImpl;
 
 public class HttpRouter implements IHttpRouter {
 
@@ -11,9 +13,15 @@ public class HttpRouter implements IHttpRouter {
     }
 
     @Override
-    public IBaseChannel getSelectChannel() {
+    public IHttpProxyChannel getSelectChannel() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public IHttpClient getSelectHttpClient() {
+
+        return new OkHttpClientImpl();
     }
 
 }

@@ -1,7 +1,7 @@
 
 package com.pacewear.httpframework.watchproxy;
 
-import com.pacewear.httpframework.channel.IBaseChannel;
+import com.pacewear.httpframework.channel.IHttpProxyChannel;
 import com.pacewear.httpframework.route.IHttpRouter;
 import com.qq.taf.jce.JceStruct;
 
@@ -19,7 +19,7 @@ public abstract class BaseHttpIntercept {
     }
 
     public boolean intercept(JceStruct data) {
-        IBaseChannel baseChannel = mHttpRouter.getSelectChannel();
+        IHttpProxyChannel baseChannel = mHttpRouter.getSelectChannel();
         if (baseChannel != null || mClientHandler == null) {
             // 走蓝牙通道的话, 不做拦截
             return false;
