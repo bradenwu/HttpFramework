@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.httpframework.bean;
+package com.pacewear.httpframework.bean;
 
 import com.qq.jce.wup.UniPacket;
 

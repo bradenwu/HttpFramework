@@ -1,7 +1,5 @@
 
-package com.pacewear.httpframework.httpframework.apachehttp;
-
-import com.pacewear.httpframework.httpframework.bean.HttpResponseWrap;
+package com.pacewear.httpframework.bean;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -19,14 +17,14 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
 
-public class HttpResponseProxy implements HttpResponse {
+public class HttpResponseObj implements HttpResponse {
     Header[] mHeaders = null;
     HashMap<String, String> mHeaderMap = new HashMap<String, String>();
     HashMap<String, Header> mTargeMap = new HashMap<String, Header>();
     HttpEntity mHttpEntity = null;
     int mStatusCode = 0;
 
-    public HttpResponseProxy(HttpResponseWrap httpResponseWrap) {
+    public HttpResponseObj(HttpResponseWrap httpResponseWrap) {
         init(httpResponseWrap);
     }
 

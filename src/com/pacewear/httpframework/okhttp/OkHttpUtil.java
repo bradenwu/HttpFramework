@@ -1,8 +1,7 @@
 
-package com.pacewear.httpframework.httpframework.okhttp;
+package com.pacewear.httpframework.okhttp;
 
 import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -11,7 +10,6 @@ import com.pacewear.httpframework.common.FileUtil;
 import com.tencent.tws.api.HttpPackage;
 import com.tencent.tws.api.HttpRequestCommand;
 import com.tencent.tws.api.HttpRequestGeneralParams;
-import com.tencent.tws.api.HttpResponseResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +26,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+// bt通道走正常的http请求，转换为okhttp请求
 public class OkHttpUtil {
     private static final String TAG = "OkHttpUtil";
     private OkHttpClient.Builder mBuilder = null;
@@ -47,7 +46,6 @@ public class OkHttpUtil {
                 try {
                     e1.mHttpData = response.body().string();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 break;

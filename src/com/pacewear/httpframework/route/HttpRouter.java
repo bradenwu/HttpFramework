@@ -1,7 +1,7 @@
 
-package com.pacewear.httpframework.httpframework.route;
+package com.pacewear.httpframework.route;
 
-import com.pacewear.httpframework.httpframework.channel.IBaseChannel;
+import com.pacewear.httpframework.channel.IBaseChannel;
 
 public class HttpRouter implements IHttpRouter {
 

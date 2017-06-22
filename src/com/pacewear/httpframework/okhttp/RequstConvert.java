@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.httpframework.okhttp;
+package com.pacewear.httpframework.okhttp;
 
 import android.text.TextUtils;
 import android.util.Log;

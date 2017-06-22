@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.httpframework.bean;
+package com.pacewear.httpframework.bean;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpPost;

@@ -1,8 +1,8 @@
 
 package com.pacewear.httpframework.watchproxy;
 
-import com.pacewear.httpframework.httpframework.channel.IBaseChannel;
-import com.pacewear.httpframework.httpframework.route.IHttpRouter;
+import com.pacewear.httpframework.channel.IBaseChannel;
+import com.pacewear.httpframework.route.IHttpRouter;
 import com.qq.taf.jce.JceStruct;
 
 public abstract class BaseHttpIntercept {

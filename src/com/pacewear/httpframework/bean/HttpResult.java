@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.httpframework.bean;
+package com.pacewear.httpframework.bean;
 
 public class HttpResult<T> {
     private int statusCode = 0;
