@@ -39,8 +39,22 @@ public class ApacheHttpClientImpl
     protected HttpRequestGeneralParams prepareRequest(HttpParams param, HttpPost request) {
         // TODO Auto-generated method stub
         HttpRequestGeneralParams target = new HttpRequestGeneralParams();
-        
-        return null;
+        target.addUrl(request.getURI().toString());
+        int timout = HttpConnectionParams.getConnectionTimeout(param);
+        if (timout > 0) {
+            target.setRequestTimeOut(timout);
+        }
+        // int sotimeout = HttpConnectionParams.getSoTimeout(param);
+        // if (sotimeout > 0) {
+        // httpParamWrap.setSoTimeout(sotimeout);
+        // }
+        HttpHost httpHost = (HttpHost) param.getParameter(ConnRoutePNames.DEFAULT_PROXY);
+        if (httpHost != null) {
+            // TODO 此处需要设置代理，扩充HttpRequestGeneralParams！！！
+            httpParamWrap.setHostName(httpHost.getHostName());
+            httpParamWrap.setHostPort(httpHost.getPort());
+        }
+        return target;
     }
 
     @Override
