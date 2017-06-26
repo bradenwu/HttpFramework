@@ -1,9 +1,8 @@
 
 package com.pacewear.httpframework.core;
 
-import com.pacewear.httpframework.bean.HttpParamWrap;
-import com.pacewear.httpframework.bean.HttpPostWrap;
-import com.pacewear.httpframework.bean.HttpResponseWrap;
+import android.content.Context;
+
 import com.pacewear.httpframework.channel.IHttpProxyChannel;
 import com.pacewear.httpframework.route.IHttpRouter;
 import com.tencent.tws.api.HttpRequestGeneralParams;
@@ -11,14 +10,15 @@ import com.tencent.tws.api.HttpResponseResult;
 
 public abstract class BaseHttpClient<Rsp, Param, Post> implements IHttpClient<Rsp, Param, Post> {
     private IHttpRouter mHttpRouter = null;
+    private Context mContext = null;
 
-    public BaseHttpClient() {
-
+    public BaseHttpClient(Context context) {
+        mContext = context;
     }
 
     @Override
     public Rsp execute(Param param, Post post) {
-        IHttpProxyChannel channel = (mHttpRouter == null ? null : mHttpRouter.getSelectChannel());
+        IHttpProxyChannel channel = (mHttpRouter == null ? null : mHttpRouter.getSelectChannel(mContext));
         if (channel != null) {
             return transmitHttpChannel(channel, param, post);
         }

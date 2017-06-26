@@ -57,7 +57,7 @@ public class WupServerHandler extends ServerHandler {
                 Log.d(TAG, "ServerHandler");
             }
         };
-        mQRomComponentWupManager.setHttpClient(new WupHttpClient());
+        mQRomComponentWupManager.setHttpClient(new WupHttpClient(context));
         mQRomComponentWupManager.startup(context);
     }
 

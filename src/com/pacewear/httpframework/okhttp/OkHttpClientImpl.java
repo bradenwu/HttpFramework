@@ -1,6 +1,8 @@
 
 package com.pacewear.httpframework.okhttp;
 
+import android.content.Context;
+
 import com.pacewear.httpframework.core.BaseHttpClient;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseResult;
@@ -15,8 +17,8 @@ import okhttp3.Response;
 // okhttp走蓝牙通道时候的处理
 public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Builder, Request> {
 
-    public OkHttpClientImpl() {
-        // TODO Auto-generated constructor stub
+    public OkHttpClientImpl(Context context) {
+        super(context);
     }
 
     @Override
@@ -31,7 +33,7 @@ public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Buil
         return null;
     }
 
-    //http->bt
+    // http->bt
     @Override
     protected HttpRequestGeneralParams prepareRequest(Builder param, Request request) {
         // TODO Auto-generated method stub

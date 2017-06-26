@@ -1,14 +1,16 @@
 
 package com.pacewear.httpframework.watchproxy;
 
+import android.content.Context;
+
 import com.pacewear.httpframework.httpserver.BaseTosService;
 import com.pacewear.httpframework.httpserver.IResponseObserver;
 import com.qq.taf.jce.JceStruct;
 
 public class HttpMsgCmdIntercept extends BaseHttpIntercept {
 
-    public HttpMsgCmdIntercept(boolean selfHandle) {
-        super(selfHandle);
+    public HttpMsgCmdIntercept(Context context, boolean selfHandle) {
+        super(context, selfHandle);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.pacewear.httpframework.common.FileUtil;
 import com.tencent.tws.api.HttpPackage;
 import com.tencent.tws.api.HttpRequestCommand;
 import com.tencent.tws.api.HttpRequestGeneralParams;
+import com.tencent.tws.api.HttpResponseExtra;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
@@ -46,7 +49,24 @@ public class OkHttpParser {
         return requestBuilder.build();
     }
 
+    public static Map<String, String> getHeadersFromPacket(Response response) {
+        Map<String, String> map = new HashMap<String, String>();
+        Headers headers = response.request().headers();
+        int size = headers.size();
+        for (int i = 0; i < size; i++) {
+            map.put(headers.name(i), headers.value(i));
+        }
+        return map;
+    }
+
+    public static HttpResponseExtra getExtraFromPacket(Response response) {
+        HttpResponseExtra extra = new HttpResponseExtra();
+        extra.setHeaders(getHeadersFromPacket(response));
+        return extra;
+    }
+
     public static void onParseResponse(Response response, HttpPackage e1) {
+        e1.setResponseExtra(getExtraFromPacket(response));
         switch (e1.mPackageType) {
             case HttpRequestCommand.GET_WITH_STREAMRETURN:
             case HttpRequestCommand.POST_WITH_STRAMRETURN:

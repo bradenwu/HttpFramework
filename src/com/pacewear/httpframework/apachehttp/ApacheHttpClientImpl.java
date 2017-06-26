@@ -1,17 +1,24 @@
 
 package com.pacewear.httpframework.apachehttp;
 
+import android.content.Context;
+
+import com.pacewear.httpframework.common.ByteUtil;
 import com.pacewear.httpframework.core.BaseHttpClient;
+import com.tencent.tws.api.HttpRequestCommand;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseResult;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -21,6 +28,10 @@ import java.io.IOException;
 
 public class ApacheHttpClientImpl
         extends BaseHttpClient<HttpResponse, HttpParams, HttpPost> {
+
+    public ApacheHttpClientImpl(Context context) {
+        super(context);
+    }
 
     @Override
     public HttpResponse onExecute(HttpParams _param, HttpPost _post) {
@@ -39,6 +50,7 @@ public class ApacheHttpClientImpl
     protected HttpRequestGeneralParams prepareRequest(HttpParams param, HttpPost request) {
         // TODO Auto-generated method stub
         HttpRequestGeneralParams target = new HttpRequestGeneralParams();
+        target.setRequestType(HttpRequestCommand.POST_WITH_STRAMRETURN);
         target.addUrl(request.getURI().toString());
         int timout = HttpConnectionParams.getConnectionTimeout(param);
         if (timout > 0) {
@@ -48,61 +60,36 @@ public class ApacheHttpClientImpl
         // if (sotimeout > 0) {
         // httpParamWrap.setSoTimeout(sotimeout);
         // }
+        // 设置代理
         HttpHost httpHost = (HttpHost) param.getParameter(ConnRoutePNames.DEFAULT_PROXY);
         if (httpHost != null) {
             // TODO 此处需要设置代理，扩充HttpRequestGeneralParams！！！
-            httpParamWrap.setHostName(httpHost.getHostName());
-            httpParamWrap.setHostPort(httpHost.getPort());
+            target.setProxy(httpHost.getHostName(), httpHost.getPort());
+        }
+        // 设置请求头
+        Header[] headers = request.getAllHeaders();
+        for (Header header : headers) {
+            target.addHeader(header.getName(), header.getValue());
+        }
+        HttpEntity entity = request.getEntity();
+        try {
+            if (entity instanceof ByteArrayEntity) {
+                byte[] body = EntityUtils.toByteArray(entity);
+                // StringEntity or ByteArrayEntitiy
+                target.addBodyEntity(ByteUtil.toHexString(body));
+            } else if (entity instanceof StringEntity) {
+                // TODO 这里需要解析StringEntity
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return target;
     }
 
     @Override
     protected HttpResponse parseResponse(HttpResponseResult rsp) {
-        // TODO Auto-generated method stub
-        return null;
+        return new HttpResponseProxy(rsp);
     }
-
-    // @Override
-    // protected HttpParamWrap onWrapParam(HttpParams param) {
-    // HttpParamWrap httpParamWrap = new HttpParamWrap();
-    // int timout = HttpConnectionParams.getConnectionTimeout(param);
-    // if (timout > 0) {
-    // httpParamWrap.setConnectionTimeout(timout);
-    // }
-    // int sotimeout = HttpConnectionParams.getSoTimeout(param);
-    // if (sotimeout > 0) {
-    // httpParamWrap.setSoTimeout(sotimeout);
-    // }
-    // HttpHost httpHost = (HttpHost) param.getParameter(ConnRoutePNames.DEFAULT_PROXY);
-    // if (httpHost != null) {
-    // httpParamWrap.setHostName(httpHost.getHostName());
-    // httpParamWrap.setHostPort(httpHost.getPort());
-    // }
-    // return httpParamWrap;
-    // }
-
-    // @Override
-    // protected HttpPostWrap onWrapPost(HttpPost post) {
-    // String url = post.getURI().toString();
-    // HttpPostWrap postWrap = new HttpPostWrap();
-    // Header[] headers = post.getAllHeaders();
-    // for (Header header : headers) {
-    // postWrap.addHeader(header.getName(), header.getValue());
-    // }
-    // try {
-    // byte[] body = EntityUtils.toByteArray(post.getEntity());
-    // postWrap.setBody(body);
-    // } catch (IOException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // return postWrap;
-    // }
-    //
-    // @Override
-    // protected HttpResponse onUnWrapRsp(HttpResponseWrap responseWrap) {
-    // return new HttpResponseProxy(responseWrap);
-    // }
 
 }

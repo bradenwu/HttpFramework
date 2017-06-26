@@ -1,7 +1,10 @@
 
 package com.pacewear.httpframework.apachehttp;
 
-import com.pacewear.httpframework.bean.HttpResponseWrap;
+import android.util.Base64;
+
+import com.tencent.tws.api.HttpResponseExtra;
+import com.tencent.tws.api.HttpResponseResult;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -17,26 +20,28 @@ import org.apache.http.params.HttpParams;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class HttpResponseProxy implements HttpResponse {
     Header[] mHeaders = null;
-    HashMap<String, String> mHeaderMap = new HashMap<String, String>();
     HashMap<String, Header> mTargeMap = new HashMap<String, Header>();
     HttpEntity mHttpEntity = null;
     int mStatusCode = 0;
 
-    public HttpResponseProxy(HttpResponseWrap httpResponseWrap) {
-        init(httpResponseWrap);
+    public HttpResponseProxy(HttpResponseResult rspResult) {
+        init(rspResult);
     }
 
-    private void init(HttpResponseWrap httpResponseWrap) {
-        mHeaderMap = httpResponseWrap.getAllHeaders();
-        mHeaders = new Header[mHeaderMap.size()];
-        byte[] body = httpResponseWrap.getResponseData();
-        mHttpEntity = new ByteArrayEntity(body);
-        mStatusCode = httpResponseWrap.getStatusCode();
-        Iterator<Entry<String, String>> iter = mHeaderMap.entrySet().iterator();
+    private void init(HttpResponseResult _result) {
+        mStatusCode = _result.mStatusCode;
+        HttpResponseExtra extra = _result.getResponseExtra();
+        Map<String, String> map = extra.getHeaders();
+        mHeaders = new Header[map.size()];
+        // TODO decode需要重点测试
+        byte[] bsContent = Base64.decode(_result.mData, Base64.DEFAULT);
+        mHttpEntity = new ByteArrayEntity(bsContent);
+        Iterator<Entry<String, String>> iter = map.entrySet().iterator();
         int cnt = 0;
         while (iter.hasNext()) {
             final Entry<String, String> entry = iter.next();
@@ -71,14 +76,14 @@ public class HttpResponseProxy implements HttpResponse {
 
     @Override
     public boolean containsHeader(String paramString) {
-        // TODO Auto-generated method stub
-        return false;
+        return mTargeMap.containsKey(paramString);
     }
 
     @Override
     public Header[] getHeaders(String paramString) {
-        // TODO Auto-generated method stub
-        return null;
+        return new Header[] {
+                mTargeMap.get(paramString)
+        };
     }
 
     @Override
