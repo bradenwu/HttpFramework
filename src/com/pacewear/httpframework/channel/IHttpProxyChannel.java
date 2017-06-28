@@ -6,4 +6,6 @@ import com.tencent.tws.api.HttpResponseResult;
 
 public interface IHttpProxyChannel {
     public HttpResponseResult transmit(HttpRequestGeneralParams request);
+
+    public boolean isReady();
 }

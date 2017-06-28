@@ -3,6 +3,7 @@ package com.pacewear.httpframework.channel;
 
 import android.content.Context;
 
+import com.pacewear.httpframework.common.DeviceUtil;
 import com.tencent.tws.api.HttpManager;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseListener;
@@ -15,6 +16,11 @@ public class BtChannel implements IHttpProxyChannel {
 
     public BtChannel(Context context) {
         mContext = context;
+    }
+
+    @Override
+    public boolean isReady() {
+        return DeviceUtil.isBluetoothOn(mContext);
     }
 
     @Override

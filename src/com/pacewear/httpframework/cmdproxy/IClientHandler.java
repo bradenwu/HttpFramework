@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.watchproxy;
+package com.pacewear.httpframework.cmdproxy;
 
 import com.pacewear.httpframework.httpserver.BaseTosService;
 import com.qq.taf.jce.JceStruct;

@@ -1,5 +1,5 @@
 
-package com.pacewear.httpframework.watchproxy;
+package com.pacewear.httpframework.cmdproxy;
 
 import android.content.Context;
 
