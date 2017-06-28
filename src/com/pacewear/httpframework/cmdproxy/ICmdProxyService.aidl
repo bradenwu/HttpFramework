@@ -5,9 +5,8 @@ import com.pacewear.httpframework.cmdproxy.CmdData;
 
 interface ICmdProxyService
 {
-	void init(int cmd,ICmdProxyCallback callback);
+	void setCallback(int cmd, ICmdProxyCallback callback);
     
-    void transmit(in CmdData data);
+    long transmit(int cmd, in CmdData data);
     
-    void deinit(int cmd,ICmdProxyCallback callback);
 }

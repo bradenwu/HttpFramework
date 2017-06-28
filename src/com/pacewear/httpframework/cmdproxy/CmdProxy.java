@@ -6,10 +6,12 @@ import android.content.Context;
 import com.qq.taf.jce.JceStruct;
 
 public class CmdProxy {
-    public static interface ICmdCallback {
+    public static interface ICmdSendCallback {
         void onSendResult(int err, String msg);
+    }
 
-        void onRecvResult(int err, JceStruct data);
+    public static interface ICmdRecv {
+        void onReceive(byte[] data);
     }
 
     private CmdProxyClient mClient = null;
@@ -17,11 +19,14 @@ public class CmdProxy {
     /**
      * context
      */
-    public void init(Context context, int cmdType) {
+    public void init(Context context, ICmdRecv receiver, int cmdType) {
         mClient = new CmdProxyClient(context, cmdType);
+        mClient.setReceiver(receiver);
     }
 
-    public void invoke(JceStruct data, ICmdCallback callback) {
-
+    public void invoke(JceStruct data, ICmdSendCallback callback) {
+        if (mClient != null) {
+            mClient.sendData(data, callback);
+        }
     }
 }

@@ -4,6 +4,6 @@ import com.pacewear.httpframework.cmdproxy.CmdData;
 
 interface ICmdProxyCallback
 {
-	void onSendResult(int err,String msg);
-    void onRecvResult(int err,in CmdData data); 
+	void onSendResult(long lReq, int err,String msg);
+    void onRecvResult(in byte[] data);
 }

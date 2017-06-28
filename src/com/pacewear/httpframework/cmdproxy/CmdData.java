@@ -11,9 +11,8 @@ public class CmdData implements Parcelable {
 
         @Override
         public CmdData createFromParcel(Parcel paramParcel) {
-            int cmd = paramParcel.readInt();
             JceStruct data = (JceStruct) paramParcel.readSerializable();
-            return new CmdData(cmd, data);
+            return new CmdData(data);
         }
 
         @Override
@@ -21,16 +20,10 @@ public class CmdData implements Parcelable {
             return new CmdData[paramInt];
         }
     };
-    private int iCmd = 0;
     private JceStruct mData = null;
 
-    public CmdData(int cmd, JceStruct data) {
-        iCmd = cmd;
+    public CmdData(JceStruct data) {
         mData = data;
-    }
-
-    public int getCmd() {
-        return iCmd;
     }
 
     public JceStruct getData() {
@@ -45,7 +38,6 @@ public class CmdData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel paramParcel, int paramInt) {
-        paramParcel.writeInt(iCmd);
         paramParcel.writeSerializable(mData);
     }
 
