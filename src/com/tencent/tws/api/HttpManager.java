@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+import com.pacewear.httpframework.HttpModule;
+import com.pacewear.httpframework.HttpModule.IHttpInvokeCallback;
 import com.tencent.tws.api.IHttpCallBack.Stub;
 
 
@@ -382,8 +383,8 @@ public  class HttpManager implements Handler.Callback{
 		
 		case doSendPackage:{
 			Log.d("HttpManager","enter handleMessage doSendPackage is ok");
-			
-			    if(!ensureBindServiceIsOk()){//when retry times is more than maxRetryTimes,all message will be cleared
+			boolean isNetAvailable = HttpModule.isNetChannelAvailble(mContext);
+			    if(!isNetAvailable && !ensureBindServiceIsOk()){//when retry times is more than maxRetryTimes,all message will be cleared
 			    	if(retryTimes >= maxRetryTimes){
 			    		mThreadHandler.sendEmptyMessage(removePackage);
 			    	}
@@ -394,7 +395,7 @@ public  class HttpManager implements Handler.Callback{
 			    	return true;//return value
 			    }//end if
 			    
-			   if(mIHttpService == null){
+			   if(!isNetAvailable && mIHttpService == null){
 				   
 			    	mThreadHandler.sendEmptyMessageDelayed(doSendPackage,1000);
 			    	return true;
@@ -417,7 +418,11 @@ public  class HttpManager implements Handler.Callback{
 					Log.d("HttpManager","11 + "+e.mPackageName);
 					if(e != null){
 						Log.d("HttpManager","before getrequest");
-						mIHttpService.getRequest(e);//final operation-binder call
+						if(isNetAvailable){
+						    invokeHttp(e);
+						} else {
+						    mIHttpService.getRequest(e);//final operation-binder call
+						}
 						Log.d("HttpManager","handleMessage doSendPackage is ok");
 					}
 				} catch (RemoteException e1) {
@@ -513,5 +518,15 @@ public  class HttpManager implements Handler.Callback{
 		
 		Log.d("HttpManager","stopHttpManagerService is ok and goto end");
 		
+	}
+
+	private void invokeHttp(HttpPackage e) {
+	    HttpModule.invokeHttp(mContext, e, new IHttpInvokeCallback() {
+            
+            @Override
+            public void onCallback(HttpPackage resultData) {
+                mThreadHandler.obtainMessage(addPackage,resultData).sendToTarget();//send to result
+            }
+        });
 	}
 }

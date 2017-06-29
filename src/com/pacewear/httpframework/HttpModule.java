@@ -3,10 +3,13 @@ package com.pacewear.httpframework;
 
 import android.content.Context;
 
+import com.pacewear.httpframework.channel.IHttpProxyChannel;
+import com.pacewear.httpframework.channel.NetChannel;
+import com.pacewear.httpframework.common.ThreadExecutors;
 import com.pacewear.httpframework.core.IHttpClient;
 import com.pacewear.httpframework.okhttp.OkHttpClientImpl;
 import com.pacewear.httpframework.okhttp.OkHttpParser;
-import com.pacewear.httpframework.route.IHttpRouter;
+import com.pacewear.httpframework.route.HttpRouter;
 import com.tencent.tws.api.HttpPackage;
 
 import okhttp3.OkHttpClient;
@@ -14,15 +17,33 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class HttpModule {
-    private IHttpRouter mHttpRouter = null;
+    public static interface IHttpInvokeCallback {
+        void onCallback(HttpPackage resultData);
+    }
 
-    public boolean invokeHttp(Context context, HttpPackage source) {
-        IHttpClient<Response, OkHttpClient.Builder, Request> okHttpClient = new OkHttpClientImpl(
-                context);
-        OkHttpClient.Builder builder = OkHttpParser.getClientBuilderFromPacket(source);
-        Request request = OkHttpParser.getRequestFromPacket(source);
-        Response response = okHttpClient.execute(builder, request);
-        OkHttpParser.onParseResponse(response, source);
-        return true;
+    public static void invokeHttp(final Context context, final HttpPackage source,
+            final IHttpInvokeCallback callback) {
+        ThreadExecutors.background().execute(new Runnable() {
+
+            @Override
+            public void run() {
+                IHttpClient<Response, OkHttpClient.Builder, Request> okHttpClient = new OkHttpClientImpl(
+                        context);
+                OkHttpClient.Builder builder = OkHttpParser.getClientBuilderFromPacket(source);
+                Request request = OkHttpParser.getRequestFromPacket(source);
+                Response response = okHttpClient.execute(builder, request);
+                OkHttpParser.onParseResponse(response, source);
+                callback.onCallback(source);
+            }
+        });
+    }
+
+    public static boolean isNetChannelAvailble(Context context) {
+        IHttpProxyChannel<Response, OkHttpClient.Builder, Request> channel = HttpRouter
+                .get().<Response, OkHttpClient.Builder, Request> getSelectChannel(context);
+        if (channel instanceof NetChannel) {
+            return true;
+        }
+        return false;
     }
 }

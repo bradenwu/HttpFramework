@@ -9,13 +9,16 @@ import com.qq.taf.jce.JceStruct;
 
 public class HttpMsgCmdIntercept extends BaseHttpIntercept {
 
-    public HttpMsgCmdIntercept(Context context, boolean selfHandle) {
-        super(context, selfHandle);
+    HttpMsgCmdIntercept(Context context) {
+        super(context);
     }
 
     @Override
     protected boolean onIntercept(JceStruct data) {
-        BaseTosService service = mClientHandler.newTosService(data);
+        if (mClientBuiltInHanlder == null) {
+            return false;
+        }
+        BaseTosService service = mClientBuiltInHanlder.newTosService(data);
         if (service == null) {
             return false;
         }
@@ -24,7 +27,7 @@ public class HttpMsgCmdIntercept extends BaseHttpIntercept {
             @Override
             public void onResponseSucceed(long uniqueSeq, int operType, JceStruct response) {
                 if (lReq == uniqueSeq) {
-                    mClientHandler.onSuccess(response);
+                    mClientBuiltInHanlder.onSuccess(response);
                 }
             }
 
@@ -32,7 +35,7 @@ public class HttpMsgCmdIntercept extends BaseHttpIntercept {
             public void onResponseFailed(long uniqueSeq, int operType, int errorCode,
                     String description) {
                 if (lReq == uniqueSeq) {
-                    mClientHandler.onFail(errorCode, description);
+                    mClientBuiltInHanlder.onFail(errorCode, description);
                 }
             }
         });

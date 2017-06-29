@@ -62,7 +62,7 @@ public class HttpCmdProxyHandler implements ICommandHandler {
     }
 
     @Override
-    public boolean doCommand(TwsMsg oMsg, android.bluetooth.BluetoothClass.Device oDeviceFrom) {
+    public boolean doCommand(TwsMsg oMsg, Device oDeviceFrom) {
         int cmd = oMsg.cmd();
         if (!mCmdSet.contains(cmd)) {
             return false;

@@ -3,32 +3,36 @@ package com.pacewear.httpframework.cmdproxy;
 
 import android.content.Context;
 
+import com.pacewear.httpframework.channel.BlueToothChannel;
 import com.pacewear.httpframework.channel.IHttpProxyChannel;
+import com.pacewear.httpframework.route.HttpRouter;
 import com.pacewear.httpframework.route.IHttpRouter;
 import com.qq.taf.jce.JceStruct;
 
 public abstract class BaseHttpIntercept {
-    private IHttpRouter mHttpRouter = null;
     protected IClientHandler mClientHandler = null;
-    private boolean mSelfHandle = false;
+    protected IClientBuiltInHanlder mClientBuiltInHanlder = null;
     private Context mContext = null;
 
-    public BaseHttpIntercept(Context context, boolean selfHandle) {
+    BaseHttpIntercept(Context context) {
         mContext = context;
-        mSelfHandle = selfHandle;
     }
 
-    public void setClientHandler(IClientHandler handler) {
+    void setClientHandler(IClientHandler handler) {
         mClientHandler = handler;
     }
 
-    public boolean intercept(JceStruct data) {
-        IHttpProxyChannel baseChannel = mHttpRouter.getSelectChannel(mContext);
-        if (baseChannel != null || mClientHandler == null) {
+    void setClientBultInHanlder(IClientBuiltInHanlder hanlder) {
+        mClientBuiltInHanlder = hanlder;
+    }
+
+    boolean intercept(JceStruct data) {
+        IHttpProxyChannel baseChannel = HttpRouter.get().getSelectChannel(mContext);
+        if (baseChannel instanceof BlueToothChannel) {
             // 走蓝牙通道的话, 不做拦截
             return false;
         }
-        if (mSelfHandle) {
+        if (mClientHandler != null) {
             mClientHandler.onSelfHandle(data);
             return true;
         }

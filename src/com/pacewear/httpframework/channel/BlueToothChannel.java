@@ -3,7 +3,7 @@ package com.pacewear.httpframework.channel;
 
 import android.content.Context;
 
-import com.pacewear.httpframework.common.DeviceUtil;
+import com.pacewear.httpframework.core.IHttpRequestAction;
 import com.tencent.tws.api.HttpManager;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseListener;
@@ -11,20 +11,30 @@ import com.tencent.tws.api.HttpResponseResult;
 
 import java.util.concurrent.Semaphore;
 
-public class BtChannel implements IHttpProxyChannel {
+public class BlueToothChannel<Rsp, Param, Post> implements IHttpProxyChannel<Rsp, Param, Post> {
+    private IHttpRequestAction<Rsp, Param, Post> mClientAction = null;
     private Context mContext = null;
 
-    public BtChannel(Context context) {
+    public BlueToothChannel(Context context) {
         mContext = context;
     }
 
     @Override
-    public boolean isReady() {
-        return DeviceUtil.isBluetoothOn(mContext);
+    public Rsp transmit(Param param, Post post) {
+        if (mClientAction == null) {
+            return null;
+        }
+        HttpRequestGeneralParams request = mClientAction.prepareRequest(param, post);
+        HttpResponseResult httpResponseWrap = transmit(request);
+        return mClientAction.parseResponse(httpResponseWrap);
     }
 
     @Override
-    public HttpResponseResult transmit(HttpRequestGeneralParams request) {
+    public void setClient(IHttpRequestAction<Rsp, Param, Post> action) {
+        mClientAction = action;
+    }
+
+    private HttpResponseResult transmit(HttpRequestGeneralParams request) {
         final SemaphoreController controller = new SemaphoreController();
         HttpManager.getInstance(mContext).postGeneralHttpRequest(request,
                 new HttpResponseListener() {

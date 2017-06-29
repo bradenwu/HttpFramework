@@ -47,7 +47,7 @@ public class ApacheHttpClientImpl
     }
 
     @Override
-    protected HttpRequestGeneralParams prepareRequest(HttpParams param, HttpPost request) {
+    public HttpRequestGeneralParams prepareRequest(HttpParams param, HttpPost request) {
         // TODO Auto-generated method stub
         HttpRequestGeneralParams target = new HttpRequestGeneralParams();
         target.setRequestType(HttpRequestCommand.POST_WITH_STRAMRETURN);
@@ -88,7 +88,7 @@ public class ApacheHttpClientImpl
     }
 
     @Override
-    protected HttpResponse parseResponse(HttpResponseResult rsp) {
+    public HttpResponse parseResponse(HttpResponseResult rsp) {
         return new HttpResponseProxy(rsp);
     }
 

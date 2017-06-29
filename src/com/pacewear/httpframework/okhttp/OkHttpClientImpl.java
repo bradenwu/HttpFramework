@@ -22,7 +22,7 @@ public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Buil
     }
 
     @Override
-    protected Response onExecute(Builder param, Request post) {
+    public Response onExecute(Builder param, Request post) {
         OkHttpClient client = param.build();
         try {
             return client.newCall(post).execute();
@@ -35,13 +35,13 @@ public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Buil
 
     // http->bt
     @Override
-    protected HttpRequestGeneralParams prepareRequest(Builder param, Request request) {
+    public HttpRequestGeneralParams prepareRequest(Builder param, Request request) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected Response parseResponse(HttpResponseResult rsp) {
+    public Response parseResponse(HttpResponseResult rsp) {
         // TODO Auto-generated method stub
         return null;
     }

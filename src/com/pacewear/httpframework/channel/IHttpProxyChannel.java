@@ -1,11 +1,11 @@
 
 package com.pacewear.httpframework.channel;
 
-import com.tencent.tws.api.HttpRequestGeneralParams;
-import com.tencent.tws.api.HttpResponseResult;
+import com.pacewear.httpframework.core.IHttpRequestAction;
 
-public interface IHttpProxyChannel {
-    public HttpResponseResult transmit(HttpRequestGeneralParams request);
+public interface IHttpProxyChannel<Rsp, Param, Post> {
+    public Rsp transmit(Param param, Post post);
 
-    public boolean isReady();
+    public void setClient(IHttpRequestAction<Rsp, Param, Post> action);
+
 }
