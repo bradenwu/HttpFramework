@@ -3,7 +3,6 @@ package com.pacewear.httpframework.apachehttp;
 
 import android.util.Base64;
 
-import com.tencent.tws.api.HttpResponseExtra;
 import com.tencent.tws.api.HttpResponseResult;
 
 import org.apache.http.Header;
@@ -16,9 +15,14 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,37 +39,45 @@ public class HttpResponseProxy implements HttpResponse {
 
     private void init(HttpResponseResult _result) {
         mStatusCode = _result.mStatusCode;
-        HttpResponseExtra extra = _result.getResponseExtra();
-        Map<String, String> map = extra.getHeaders();
-        mHeaders = new Header[map.size()];
+        List<Header> headerList = new ArrayList<Header>();
+        String extra = _result.getResponseExtra();
+        try {
+            JSONObject headers = new JSONObject(extra);
+            if (headers != null) {
+                Iterator<String> keys = headers.keys();
+                while (keys.hasNext()) {
+                    final String key = (String) keys.next();
+                    final String val = headers.optString(key);
+                    Header _header = new Header() {
+
+                        @Override
+                        public String getValue() {
+                            return val;
+                        }
+
+                        @Override
+                        public String getName() {
+                            return key;
+                        }
+
+                        @Override
+                        public HeaderElement[] getElements() throws ParseException {
+                            return null;
+                        }
+                    };
+                    headerList.add(_header);
+                }
+                mHeaders = (Header[]) headerList.toArray();
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        // Map<String, String> map = extra.getHeaders();
         // TODO decode需要重点测试
         byte[] bsContent = Base64.decode(_result.mData, Base64.DEFAULT);
         mHttpEntity = new ByteArrayEntity(bsContent);
-        Iterator<Entry<String, String>> iter = map.entrySet().iterator();
-        int cnt = 0;
-        while (iter.hasNext()) {
-            final Entry<String, String> entry = iter.next();
-            Header header = new Header() {
-
-                @Override
-                public String getValue() {
-                    return entry.getValue();
-                }
-
-                @Override
-                public String getName() {
-                    return entry.getKey();
-                }
-
-                @Override
-                public HeaderElement[] getElements() throws ParseException {
-                    return null;
-                }
-            };
-            mHeaders[cnt] = header;
-            mTargeMap.put(entry.getKey(), header);
-            cnt++;
-        }
     }
 
     @Override

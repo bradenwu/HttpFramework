@@ -15,6 +15,7 @@ import org.apache.http.params.HttpParams;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -27,14 +28,14 @@ import okhttp3.RequestBody;
 public class RequstConvert {
     private static final String TAG = "ParamConvert";
 
-    public static void parseHttpClientParam(OkHttpClient.Builder builder, HttpParams params) {
-        HttpHost httpHost = (HttpHost) params.getParameter(ConnRoutePNames.DEFAULT_PROXY);
-        if (httpHost != null) {
-            builder.proxy(new Proxy(Proxy.Type.HTTP,
-                    new InetSocketAddress(httpHost.getHostName(), httpHost.getPort())));
-        }
-
-    }
+    // public static void parseHttpClientParam(OkHttpClient.Builder builder, HttpParams params) {
+    // HttpHost httpHost = (HttpHost) params.getParameter(ConnRoutePNames.DEFAULT_PROXY);
+    // if (httpHost != null) {
+    // builder.proxy(new Proxy(Proxy.Type.HTTP,
+    // new InetSocketAddress(httpHost.getHostName(), httpHost.getPort())));
+    // }
+    //
+    // }
 
     public static void parseHttpParam(OkHttpClient.Builder builder,
             HttpRequestGeneralParams _params,
@@ -48,6 +49,14 @@ public class RequstConvert {
             builder.connectTimeout(6000, TimeUnit.MILLISECONDS);
         }
 
+        if ((_maskFlag & HttpRequestGeneralParams.CONTROL_PROXY) != 0) {
+            HashMap<String, String> headers = _params.getHeader();
+            String url = headers.get(HttpRequestGeneralParams.HEADER_PROXY_URL);
+            String sport = headers.get(HttpRequestGeneralParams.HEADER_PROXY_PORT);
+            int port = Integer.parseInt(sport);
+            builder.proxy(new Proxy(Proxy.Type.HTTP,
+                    new InetSocketAddress(url, port)));
+        }
         // cache-timeout, not support
         // if ((_maskFlag & HttpRequestGeneralParams.CONTROL_CACHETIMEOUT) != 0) {
         // builder.readTimeout(timeout, unit)

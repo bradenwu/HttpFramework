@@ -20,13 +20,13 @@ public class HttpRequestGeneralParams {
     public static int CONTROL_PROXY = 0x00010000; // if setproxy
     // below represent general head of HTTPUTILS
     public static int HEADPART = 0x00010000;
-
     // below represent general body of HTTPUTILS
 
     public static int BODYPART = 0x01000000;
     public static int BODYPART_WITHENTITY = 0x10000000;
     public static int BODYMASK = 0x11000000;
-
+    public static final String HEADER_PROXY_URL = "header_proxy_url";
+    public static final String HEADER_PROXY_PORT = "header_proxy_port";
     public int mMaskFlag = 0;
 
     public String UserAgent = null;
@@ -58,8 +58,10 @@ public class HttpRequestGeneralParams {
         mMaskFlag |= CONTROL_TIMEOUT;
     }
 
-    public void setProxy(String url,int port){
-        
+    public void setProxy(String url, int port) {
+        mMaskFlag |= CONTROL_PROXY;
+        mHeader.put(HEADER_PROXY_URL, url);
+        mHeader.put(HEADER_PROXY_PORT, port + "");
     }
 
     public void setCacheResult(boolean flag, int timeOut) {
@@ -133,7 +135,10 @@ public class HttpRequestGeneralParams {
             if ((mParams.mMaskFlag & CONTROL_USERAGENT) != 0) {
                 jsonObject.put("UserAgent", mParams.UserAgent);
             }
-
+            if ((mParams.mMaskFlag & CONTROL_PROXY) != 0) {
+                jsonObject.put(HEADER_PROXY_URL, mParams.mHeader.put(HEADER_PROXY_URL, ""));
+                jsonObject.put(HEADER_PROXY_PORT, mParams.mHeader.put(HEADER_PROXY_PORT, ""));
+            }
             // now finish put control part
 
         } catch (JSONException e) {
@@ -238,6 +243,10 @@ public class HttpRequestGeneralParams {
                 mResult.UserAgent = resultJson.optString("UserAgent");
             }
 
+            if ((mMaskFlag & CONTROL_PROXY) != 0) {
+                mResult.addHeader(HEADER_PROXY_URL, resultJson.optString(HEADER_PROXY_URL));
+                mResult.addHeader(HEADER_PROXY_PORT, resultJson.optString(HEADER_PROXY_PORT));
+            }
             // 2.extract from head part
             if ((mMaskFlag & HEADPART) != 0) {
                 JSONObject jsonHeadArray = resultJson.optJSONObject("headpart");

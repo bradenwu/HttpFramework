@@ -49,7 +49,6 @@ public class HttpService extends Service {
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
             ConnectivityManager manager = (ConnectivityManager) context
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo mobileInfo = manager
@@ -66,7 +65,7 @@ public class HttpService extends Service {
 
     ExecutorService fixedThreadPool;// thread pool service
 
-    private static final int POOLSIZE = 3;
+    private static final int POOLSIZE = 2;
 
     public static BlockingQueue<HttpPackage> waitqueue = new LinkedBlockingQueue<HttpPackage>();// keep
                                                                                                 // all
@@ -150,26 +149,21 @@ public class HttpService extends Service {
 
         fixedThreadPool = Executors.newFixedThreadPool(POOLSIZE);
 
-        for (int i = 0; i < POOLSIZE - 1; i++) {
-            // use two thread to do http request
-            final int index = i;
-            fixedThreadPool.execute(new Runnable() {
+        fixedThreadPool.execute(new Runnable() {
 
-                @Override
-                public void run() {
-                    while (true) {
-                        doDealReplyMessage(index);
-                    } // while looper,just search
-                }
-            });
-        }
+            @Override
+            public void run() {
+                while (true) {
+                    doDealReplyMessage();
+                } // while looper,just search
+            }
+        });
 
         fixedThreadPool.execute(new Runnable() {
 
             // use one thread to reply watch side
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 while (true) {
                     doSendHttpBackMessage();
                 }
@@ -192,13 +186,12 @@ public class HttpService extends Service {
         Log.i(TAG, "doAddHttpRequestMessage is ok");
     }
 
-    private void doDealReplyMessage(int index) {
+    private void doDealReplyMessage() {
         // this function may block
         HttpPackage e1 = null;
         try {
             e1 = waitqueue.take();
         } catch (InterruptedException e2) {
-            // TODO Auto-generated catch block
             e2.printStackTrace();
 
             return;
@@ -211,9 +204,9 @@ public class HttpService extends Service {
 
         // fail with netWorkStatus
         if (mNetWorkStatus.get() == false) {
-            e.mStatusCode = HttpRequestCommand.NETWORKFAIL_STATUS;
-            e.mPackageType = HttpResponseResult.DirectDatas;
-            e.mHttpData = "current network is not working,please check your phone";
+            e.setStatusCode(HttpRequestCommand.NETWORKFAIL_STATUS);
+            e.setReplyType(HttpResponseResult.DirectDatas);
+            e.setHttpData("current network is not working,please check your phone");
 
             replyqueue.offer(e);// just do reply
             return;
@@ -224,13 +217,23 @@ public class HttpService extends Service {
 
             @Override
             public void onCallback(HttpPackage resultData) {
-                replyqueue.offer(resultData);
+                sendReplyWithFile(resultData);
             }
         });
     }
 
     private void sendReplyWithFile(HttpPackage e) {
-        if (e.mHttpData.length() >= 16 * 1024) {
+        // TODO 已经下载了的数据？？
+        if (e.getReplyType() == HttpResponseResult.isFileDatas) {
+            String targetFile = e.getHttpData();
+            int len = targetFile.length();
+            String fileName = targetFile.substring(targetFile.lastIndexOf("/") + 1, len);
+            int fileNameLen = fileName.length();
+            String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileNameLen);
+            sendFile(e, targetFile, fileName, extension);
+            return;
+        }
+        if (e.getHttpData().length() >= 16 * 1024) {
             // if we encounter big body ,so transfer with file
             final long mFileName = System.currentTimeMillis();// generate file
                                                               // name
@@ -242,14 +245,13 @@ public class HttpService extends Service {
                 try {
                     file.createNewFile();
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
             }
 
             try {
                 InputStream in = new ByteArrayInputStream(
-                        e.mHttpData.getBytes());
+                        e.getHttpData().getBytes());
                 OutputStream out = new FileOutputStream(mPhoneDir);
                 byte[] buf1 = new byte[1024];
                 int len;
@@ -259,10 +261,9 @@ public class HttpService extends Service {
                 in.close();
                 out.close();
             } catch (IOException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-            sendFile(e, mPhoneDir, mFileName, "txt");// send to destination
+            sendFile(e, mPhoneDir, mFileName + "", "txt");// send to destination
         } else {
             Log.d(TAG, "run direct is right");
             replyqueue.offer(e);
@@ -289,7 +290,6 @@ public class HttpService extends Service {
         try {
             e = replyqueue.take();
         } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
 
             return;
@@ -307,14 +307,14 @@ public class HttpService extends Service {
                         if (!bSuc) {
                             replyqueue.offer(e);
                             QRomLog.w(TAG, "send msg to dma  error "
-                                    + e.mHttpData);
+                                    + e.getHttpData());
                         }
                     }
 
                     @Override
                     public void onLost(int nReason, long lReqId) {
                         replyqueue.offer(e);
-                        QRomLog.w(TAG, "send msg to dma  error " + e.mHttpData);
+                        QRomLog.w(TAG, "send msg to dma  error " + e.getHttpData());
                     }
                 });// send to watchside
         if (!sucess) {
@@ -335,20 +335,21 @@ public class HttpService extends Service {
     }
 
     private void sendFile(final HttpPackage e, final String sourcePath,
-            final long mFileName, final String mExtensionName) {
+            final String mFileName, final String mExtensionName) {
         FileTransferManager.getInstance(HttpService.this).sendFile(sourcePath,
                 HTTP_SERVICE_DIR, new FileTransferListener() {
                     @Override
                     public void onTransferComplete(long requestId,
                             String filePath) {
-                        if (e.mPackageType != HttpRequestCommand.GET_WITH_STREAMRETURN
-                                && e.mPackageType != HttpRequestCommand.POST_WITH_STRAMRETURN)
-                            e.mPackageType = HttpResponseResult.inDirectDatas;
-                        e.mHttpData = HTTP_SERVICE_DIR + "/" + mFileName + "."
-                                + mExtensionName;// dir_path is fix dir_path
-                                                 // plus
-                                                 // time_path.mExtensionName
-                        e.mStatusCode = HttpRequestCommand.NORMAL_STATUS;
+                        if (e.getType() != HttpRequestCommand.GET_WITH_STREAMRETURN
+                                && e.getType() != HttpRequestCommand.POST_WITH_STRAMRETURN) {
+                            e.setReplyType(HttpResponseResult.inDirectDatas);
+                        }
+                        e.setHttpData(HTTP_SERVICE_DIR + "/" + mFileName + "."
+                                + mExtensionName);// dir_path is fix dir_path
+                                                  // plus
+                                                  // time_path.mExtensionName
+                        e.setStatusCode(HttpRequestCommand.NORMAL_STATUS);
 
                         Log.i(TAG, "onTransfer is ok");
                         replyqueue.offer(e);// use link structure, it will not
@@ -363,11 +364,12 @@ public class HttpService extends Service {
                     public void onTransferError(long requestId,
                             String fileName, int errorCode) {
                         Log.i(TAG, "onTransferError");
-                        if (e.mPackageType != HttpRequestCommand.GET_WITH_STREAMRETURN
-                                && e.mPackageType != HttpRequestCommand.POST_WITH_STRAMRETURN)
-                            e.mPackageType = HttpResponseResult.inDirectDatas;
-                        e.mHttpData = "NONE";
-                        e.mStatusCode = HttpRequestCommand.NETWORKFAIL_STATUS;
+                        if (e.getType() != HttpRequestCommand.GET_WITH_STREAMRETURN
+                                && e.getType() != HttpRequestCommand.POST_WITH_STRAMRETURN) {
+                            e.setReplyType(HttpResponseResult.inDirectDatas);
+                        }
+                        e.setHttpData("NONE");
+                        e.setStatusCode(HttpRequestCommand.NETWORKFAIL_STATUS);
 
                         replyqueue.offer(e);// use link structure, it will not
                                             // fail

@@ -36,7 +36,7 @@ public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Buil
     // http->bt
     @Override
     public HttpRequestGeneralParams prepareRequest(Builder param, Request request) {
-        // TODO Auto-generated method stub
+//        param.
         return null;
     }
 
