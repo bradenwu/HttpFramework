@@ -121,6 +121,7 @@ public class RawDataSendPhone implements ICommandHandler {
     }
 
     private void doReplyForHttpService(TwsMsg oMsg, Device oDeviceFrom) {
+        Log.d(TAG, "doReplyForHttpService now");
         RawData mData = new RawData();
         // JceInputStream oIn = new JceInputStream(oMsg.msgByte(), oMsg.startPosOfContent());
         JceInputStream oIn = oMsg.getInputStreamUTF8();
@@ -133,6 +134,7 @@ public class RawDataSendPhone implements ICommandHandler {
             isHttpServiceReady = false;
         }
         if (isHttpServiceReady) {
+            Log.d(TAG, "doReplyForHttpService serviceReady,so getwatchmsg");
             HttpService.getWatchSideMessage(mData.getBmpPhoto());
         }
 

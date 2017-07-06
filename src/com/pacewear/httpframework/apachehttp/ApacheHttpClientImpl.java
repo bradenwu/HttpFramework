@@ -2,6 +2,7 @@
 package com.pacewear.httpframework.apachehttp;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.pacewear.httpframework.common.ByteUtil;
 import com.pacewear.httpframework.core.BaseHttpClient;
@@ -69,8 +70,19 @@ public class ApacheHttpClientImpl
         // 设置请求头
         Header[] headers = request.getAllHeaders();
         for (Header header : headers) {
-            target.addHeader(header.getName(), header.getValue());
+            if (TextUtils.equals("Host", header.getName())) {
+                String val = header.getValue();
+                int indexDot = val.lastIndexOf(":");
+                String hostName = val.substring(0, indexDot);
+                String port = val.substring(indexDot + 1, val.length());
+                if (TextUtils.isDigitsOnly(port)) {
+                    target.setProxy(hostName, Integer.parseInt(port));
+                }
+            } else {
+                target.addHeader(header.getName(), header.getValue());
+            }
         }
+        target.addHeader("Connection", "close");//okhttp此次设置Connection为close
         HttpEntity entity = request.getEntity();
         try {
             if (entity instanceof ByteArrayEntity) {

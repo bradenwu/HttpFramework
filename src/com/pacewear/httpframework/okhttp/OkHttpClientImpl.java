@@ -2,7 +2,9 @@
 package com.pacewear.httpframework.okhttp;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.pacewear.httpframework.common.Constants;
 import com.pacewear.httpframework.core.BaseHttpClient;
 import com.tencent.tws.api.HttpRequestGeneralParams;
 import com.tencent.tws.api.HttpResponseResult;
@@ -21,22 +23,29 @@ public class OkHttpClientImpl extends BaseHttpClient<Response, OkHttpClient.Buil
         super(context);
     }
 
+    public OkHttpClientImpl(Context context, boolean invokeDirect) {
+        super(context);
+        setInvokeDirect(invokeDirect);
+    }
+
     @Override
     public Response onExecute(Builder param, Request post) {
+        Log.d(Constants.TAG, "OkHttpClientImpl execute..");
         OkHttpClient client = param.build();
         try {
             return client.newCall(post).execute();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            Log.e(Constants.TAG, "client execute error!");
             e.printStackTrace();
         }
+        Log.e(Constants.TAG, "client execute return null!!!");
         return null;
     }
 
     // http->bt
     @Override
     public HttpRequestGeneralParams prepareRequest(Builder param, Request request) {
-//        param.
+        // param.
         return null;
     }
 

@@ -15,6 +15,8 @@ import com.qq.taf.jce.JceStruct;
 import java.util.HashMap;
 
 public class CmdProxyClient {
+    public static final String SERVICE_ACTION = "com.pacewear.httpframework.cmdproxy.action_cmdproxy";
+    public static final String SERVICE_PACKAGE = "com.tencent.tws.watchside";
     private Context mContext = null;
     private ICmdProxyService mService = null;
     private int mClientCmd = 0;
@@ -87,8 +89,8 @@ public class CmdProxyClient {
     }
 
     private boolean bindRemoteService(Context context) {
-        Intent intent = new Intent(CmdProxyService.SERVICE_ACTION);
-        intent.setPackage(CmdProxyService.SERVICE_PACKAGE);
+        Intent intent = new Intent(SERVICE_ACTION);
+        intent.setPackage(SERVICE_PACKAGE);
         return context.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 }

@@ -34,7 +34,7 @@ public abstract class BaseTosService
     private String mReqName = REQ_NAME;
     private String mRspName = RSP_NAME;
     protected boolean mNeedReqHeader = true;
-    private Context mContext = null;
+    protected Context mContext = null;
 
     public BaseTosService(Context context, String _module, String _req, String _rsp) {
         mContext = context;

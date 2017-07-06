@@ -92,7 +92,7 @@ public class HttpService extends Service {
         IntentFilter filter = new IntentFilter(
                 ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mInnerBroadcast, filter);
-    };
+    }
 
     private void unRegisterNetWorkConnect() {
         unregisterReceiver(mInnerBroadcast);
@@ -176,10 +176,12 @@ public class HttpService extends Service {
     private static void doAddHttpRequestMessage(String data) {
         // add HttpPackage that comes from watchside ,this function will no be
         // blocked
+        Log.i(TAG, "doAddHttpRequestMessage begin");
         final HttpPackage e = HttpPackage.StringToHttpPackage(data);
 
-        if (e == null)
+        if (e == null) {
             return;
+        }
 
         waitqueue.add(e);
 
@@ -193,15 +195,16 @@ public class HttpService extends Service {
             e1 = waitqueue.take();
         } catch (InterruptedException e2) {
             e2.printStackTrace();
-
+            Log.e(TAG, "take queue failed");
             return;
         }
 
         final HttpPackage e = e1;
 
-        if (e == null)
+        if (e == null) {
+            Log.e(TAG, "package is null");
             return;
-
+        }
         // fail with netWorkStatus
         if (mNetWorkStatus.get() == false) {
             e.setStatusCode(HttpRequestCommand.NETWORKFAIL_STATUS);
@@ -213,10 +216,11 @@ public class HttpService extends Service {
         }
 
         // now do real http-opearation
-        HttpModule.invokeHttp(getApplicationContext(), e, new IHttpInvokeCallback() {
+        HttpModule.invokeHttp(getApplicationContext(), e, true, new IHttpInvokeCallback() {
 
             @Override
             public void onCallback(HttpPackage resultData) {
+                Log.d(TAG, "okhttp invoke callback");
                 sendReplyWithFile(resultData);
             }
         });
@@ -323,6 +327,7 @@ public class HttpService extends Service {
     }
 
     public static void getWatchSideMessage(String data) {
+        Log.d(TAG, "getWatchSideMessage now");
         doAddHttpRequestMessage(data);
     }
 

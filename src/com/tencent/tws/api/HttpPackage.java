@@ -108,14 +108,13 @@ public class HttpPackage implements Parcelable {
         String mExtra;
         try {
             JSONObject resultJson = new JSONObject(data);
-
-            mSessionID = resultJson.getLong("mSessionID");
-            mPackageName = resultJson.getString("mPackageName");
-            mPackageType = resultJson.getInt("mPackageType");
-            mReplyType = resultJson.getInt("mReplyType");
-            mStatusCode = resultJson.getInt("mStatusCode");
-            mHttpData = resultJson.getString("mHttpData");
-            mExtra = resultJson.getString("mExtra");
+            mSessionID = resultJson.optLong("mSessionID");
+            mPackageName = resultJson.optString("mPackageName");
+            mPackageType = resultJson.optInt("mPackageType");
+            mReplyType = resultJson.optInt("mReplyType");
+            mStatusCode = resultJson.optInt("mStatusCode");
+            mHttpData = resultJson.optString("mHttpData");
+            mExtra = resultJson.optString("mExtra");
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

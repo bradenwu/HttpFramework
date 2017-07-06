@@ -11,6 +11,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.params.HttpParams;
+import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -53,9 +54,11 @@ public class RequstConvert {
             HashMap<String, String> headers = _params.getHeader();
             String url = headers.get(HttpRequestGeneralParams.HEADER_PROXY_URL);
             String sport = headers.get(HttpRequestGeneralParams.HEADER_PROXY_PORT);
-            int port = Integer.parseInt(sport);
-            builder.proxy(new Proxy(Proxy.Type.HTTP,
-                    new InetSocketAddress(url, port)));
+            if (!TextUtils.isEmpty(sport) && TextUtils.isDigitsOnly(sport)) {
+                int port = Integer.parseInt(sport);
+                builder.proxy(new Proxy(Proxy.Type.HTTP,
+                        new InetSocketAddress(url, port)));
+            }
         }
         // cache-timeout, not support
         // if ((_maskFlag & HttpRequestGeneralParams.CONTROL_CACHETIMEOUT) != 0) {
@@ -78,14 +81,25 @@ public class RequstConvert {
         String url = _params.URl;
         builder.url(url);
         // 0.set user-agent
-        builder.removeHeader(OkHttpConstants.USER_AGENT).addHeader(OkHttpConstants.USER_AGENT,
-                _params.UserAgent);
+        if (!TextUtils.isEmpty(_params.UserAgent)) {
+            builder.removeHeader(OkHttpConstants.USER_AGENT).addHeader(OkHttpConstants.USER_AGENT,
+                    _params.UserAgent);
+        }
         // 1.add head
+        String key = null;
+        String val = null;
         if (!_params.getHeader().isEmpty()) {
             for (Map.Entry<String, String> entry : _params.getHeader()
                     .entrySet()) {
-                builder.addHeader(entry.getKey(), entry.getValue());
-                HttpLog.i(TAG, "head (" + entry.getKey() + "," + entry.getValue()
+                entry.getKey();
+                key = entry.getKey();
+                val = entry.getValue();
+                if (HttpRequestGeneralParams.HEADER_PROXY_URL.equalsIgnoreCase(key)
+                        || HttpRequestGeneralParams.HEADER_PROXY_PORT.equalsIgnoreCase(key)) {
+                    continue;
+                }
+                builder.addHeader(key, val);
+                HttpLog.i(TAG, "head (" + key + "," + val
                         + ")");
 
             } // add header

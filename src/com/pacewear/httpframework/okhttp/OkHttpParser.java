@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.pacewear.httpframework.common.ByteUtil;
+import com.pacewear.httpframework.common.Constants;
 import com.pacewear.httpframework.common.FileUtil;
 import com.tencent.tws.api.HttpPackage;
 import com.tencent.tws.api.HttpRequestCommand;
@@ -32,6 +33,7 @@ public class OkHttpParser {
     private static final String TAG = "OkHttpUtil";
 
     public static OkHttpClient.Builder getClientBuilderFromPacket(HttpPackage e1) {
+        Log.d(Constants.TAG, "getClientBuilderFromPacket");
         OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
         HttpRequestGeneralParams param = HttpRequestGeneralParams
                 .StringToHttpRequestGeneralParams(e1.getHttpData());
@@ -40,6 +42,7 @@ public class OkHttpParser {
     }
 
     public static Request getRequestFromPacket(HttpPackage e1) {
+        Log.d(Constants.TAG, "getRequestFromPacket");
         HttpRequestGeneralParams param = HttpRequestGeneralParams
                 .StringToHttpRequestGeneralParams(e1.getHttpData());
         Request.Builder requestBuilder = new Request.Builder();
@@ -53,6 +56,8 @@ public class OkHttpParser {
         int size = headers.size();
         for (int i = 0; i < size; i++) {
             try {
+                Log.d(Constants.TAG, "getHeadersFromPacket->headers.name(i):" + headers.name(i)
+                        + ",headers.val(i):" + headers.value(i));
                 json.put(headers.name(i), headers.value(i));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -62,14 +67,21 @@ public class OkHttpParser {
     }
 
     public static void onParseResponse(Response response, HttpPackage e1) {
+        if (response == null) {
+            Log.e(Constants.TAG, "onParseResponse,response is null!!");
+            return;
+        }
         e1.setResponseExtra(getHeadersFromPacket(response));
+        Log.d(Constants.TAG, "onParseResponse,code:" + response.code());
         e1.setStatusCode(response.code());
         switch (e1.getType()) {
             case HttpRequestCommand.GET_WITH_STREAMRETURN:
             case HttpRequestCommand.POST_WITH_STRAMRETURN:
+                Log.d(Constants.TAG, "post/get stream return");
                 e1.setHttpData(onParseInputStream(response));
                 break;
             case HttpRequestCommand.GET_TEXT:
+                Log.d(Constants.TAG, "get text");
                 try {
                     e1.setHttpData(response.body().string());
                 } catch (IOException e) {
@@ -79,10 +91,12 @@ public class OkHttpParser {
             case HttpRequestCommand.POST:
             case HttpRequestCommand.GET_WITH_GENERAL_TEXT:
             case HttpRequestCommand.POST_WITH_GENERAL:
+                Log.d(Constants.TAG, "post/get_with_general_text/post_with_general");
                 e1.setHttpData(onParseCommonResponse(response));
                 break;
             case HttpRequestCommand.GET_WITH_GENERAL_FILE:
             case HttpRequestCommand.GET_PNG_IMAGE:
+                Log.d(Constants.TAG, "download");
                 onParseDownloadRsp(e1, response);
                 break;
             default:
@@ -101,7 +115,7 @@ public class OkHttpParser {
         String strBody = "";
         try {
             strBody = response.body().string();
-
+            Log.d(Constants.TAG, "strBody result:" + strBody);
             // encode HttpResponce into jsonobject
             JSONObject jsonObject = new JSONObject();// main object
             JSONObject jsonHead = new JSONObject();
@@ -129,7 +143,7 @@ public class OkHttpParser {
                 e.printStackTrace();
                 Log.i(TAG, "put responseBody error");
             }
-
+            Log.d(Constants.TAG, "json result:" + jsonObject.toString());
             return jsonObject.toString();
 
         } catch (IOException e) {

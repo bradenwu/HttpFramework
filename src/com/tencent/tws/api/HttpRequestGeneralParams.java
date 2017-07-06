@@ -135,10 +135,6 @@ public class HttpRequestGeneralParams {
             if ((mParams.mMaskFlag & CONTROL_USERAGENT) != 0) {
                 jsonObject.put("UserAgent", mParams.UserAgent);
             }
-            if ((mParams.mMaskFlag & CONTROL_PROXY) != 0) {
-                jsonObject.put(HEADER_PROXY_URL, mParams.mHeader.put(HEADER_PROXY_URL, ""));
-                jsonObject.put(HEADER_PROXY_PORT, mParams.mHeader.put(HEADER_PROXY_PORT, ""));
-            }
             // now finish put control part
 
         } catch (JSONException e) {
@@ -243,10 +239,6 @@ public class HttpRequestGeneralParams {
                 mResult.UserAgent = resultJson.optString("UserAgent");
             }
 
-            if ((mMaskFlag & CONTROL_PROXY) != 0) {
-                mResult.addHeader(HEADER_PROXY_URL, resultJson.optString(HEADER_PROXY_URL));
-                mResult.addHeader(HEADER_PROXY_PORT, resultJson.optString(HEADER_PROXY_PORT));
-            }
             // 2.extract from head part
             if ((mMaskFlag & HEADPART) != 0) {
                 JSONObject jsonHeadArray = resultJson.optJSONObject("headpart");

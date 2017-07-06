@@ -14,6 +14,8 @@ import com.pacewear.httpframework.HttpModule;
 import com.pacewear.httpframework.HttpModule.IHttpInvokeCallback;
 import com.tencent.tws.api.IHttpCallBack.Stub;
 
+import org.apache.http.HttpResponse;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -281,13 +283,13 @@ public class HttpManager implements Handler.Callback {
             return;
 
         Log.d("HttpManager",
-                "HttpManager dealReply+" + mData.getSessionId() + " data" + mData.getHttpData());
+                "HttpManager dealReply+" + mData.getSessionId() + " data" + mData.getHttpData()+" statuscode:"+mData.getStatusCode());
 
         if (mMap.containsKey(mData.getSessionId())) {
 
             HttpResponseListener e = mMap.get(mData.getSessionId());
-
-            if (mData.getStatusCode() == HttpRequestCommand.NORMAL_STATUS) {
+            int statusCode = convertCode(mData.getStatusCode());
+            if (statusCode == HttpRequestCommand.NORMAL_STATUS) {
                 if (mData.getType() == HttpRequestCommand.GET_WITH_STREAMRETURN
                         || mData.getType() == HttpRequestCommand.POST_WITH_STRAMRETURN) {
                     String mSuffix = mData.getHttpData();
@@ -317,14 +319,17 @@ public class HttpManager implements Handler.Callback {
                         }
                     }
                 } // end if
-
-                e.onResponse(new HttpResponseResult(mData.getStatusCode(), mData.getReplyType(),
+                if(e != null) {
+                    e.onResponse(new HttpResponseResult(statusCode, mData.getReplyType(),
                         mData.getHttpData()));
+                }
                 Log.d("HttpManager", "onResponce ok");
             } else {
                 // under error status ,no data get
-                e.onError(mData.getStatusCode(), new HttpResponseResult(mData.getStatusCode(),
+                if(e != null){
+                    e.onError(statusCode, new HttpResponseResult(statusCode,
                         mData.getReplyType(), mData.getHttpData()));
+                }
                 Log.d("HttpManager", "onResponce bad");
             }
 
@@ -333,6 +338,25 @@ public class HttpManager implements Handler.Callback {
         } // condition operation
     }
 
+    private int convertCode(int oldCode) {
+        int newCode = HttpRequestCommand.UNDEFINE_STATUS;
+        switch (oldCode) {
+            case HttpRequestCommand.NORMAL_STATUS:
+            case HttpRequestCommand.NETWORKFAIL_STATUS:
+            case HttpRequestCommand.BLUETEETHFAIL_STATUS:
+            case HttpRequestCommand.HTTPSERVICEFAIL:
+            case HttpRequestCommand.TIMEOUTSTATUS:
+                newCode = oldCode;
+                break;
+            case 200:
+                newCode = HttpRequestCommand.NORMAL_STATUS;
+                break;
+            default:
+                newCode = HttpRequestCommand.NETWORKFAIL_STATUS;
+                break;
+        }
+        return newCode;
+    }
     @Override
     public boolean handleMessage(Message msg) {
         // TODO Auto-generated method stub

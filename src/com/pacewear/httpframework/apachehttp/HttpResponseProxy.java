@@ -1,6 +1,7 @@
 
 package com.pacewear.httpframework.apachehttp;
 
+import android.text.TextUtils;
 import android.util.Base64;
 
 import com.tencent.tws.api.HttpResponseResult;
@@ -41,39 +42,40 @@ public class HttpResponseProxy implements HttpResponse {
         mStatusCode = _result.mStatusCode;
         List<Header> headerList = new ArrayList<Header>();
         String extra = _result.getResponseExtra();
-        try {
-            JSONObject headers = new JSONObject(extra);
-            if (headers != null) {
-                Iterator<String> keys = headers.keys();
-                while (keys.hasNext()) {
-                    final String key = (String) keys.next();
-                    final String val = headers.optString(key);
-                    Header _header = new Header() {
+        if (!TextUtils.isEmpty(extra)) {
+            try {
+                JSONObject headers = new JSONObject(extra);
+                if (headers != null) {
+                    Iterator<String> keys = headers.keys();
+                    while (keys.hasNext()) {
+                        final String key = (String) keys.next();
+                        final String val = headers.optString(key);
+                        Header _header = new Header() {
 
-                        @Override
-                        public String getValue() {
-                            return val;
-                        }
+                            @Override
+                            public String getValue() {
+                                return val;
+                            }
 
-                        @Override
-                        public String getName() {
-                            return key;
-                        }
+                            @Override
+                            public String getName() {
+                                return key;
+                            }
 
-                        @Override
-                        public HeaderElement[] getElements() throws ParseException {
-                            return null;
-                        }
-                    };
-                    headerList.add(_header);
+                            @Override
+                            public HeaderElement[] getElements() throws ParseException {
+                                return null;
+                            }
+                        };
+                        headerList.add(_header);
+                    }
+                    mHeaders = (Header[]) headerList.toArray();
                 }
-                mHeaders = (Header[]) headerList.toArray();
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
-
         // Map<String, String> map = extra.getHeaders();
         // TODO decode需要重点测试
         byte[] bsContent = Base64.decode(_result.mData, Base64.DEFAULT);
