@@ -9,8 +9,12 @@ import com.pacewear.httpframework.channel.NetChannel;
 import com.pacewear.httpframework.common.Constants;
 import com.pacewear.httpframework.common.ThreadExecutors;
 import com.pacewear.httpframework.core.IHttpClient;
-import com.pacewear.httpframework.okhttp.OkHttpClientImpl;
-import com.pacewear.httpframework.okhttp.OkHttpParser;
+import com.pacewear.httpframework.okhttp.OkHttpClientImp;
+import com.pacewear.httpframework.okhttp.OkHttpRequestConvert;
+import com.pacewear.httpframework.okhttp.OkHttpResponseConvert;
+import com.pacewear.httpframework.okhttp.bean.OkHttpClientBuilder;
+import com.pacewear.httpframework.okhttp.bean.RequestBuilder;
+import com.pacewear.httpframework.okhttp.bean.ResponseBuilder;
 import com.pacewear.httpframework.route.HttpRouter;
 import com.tencent.tws.api.HttpPackage;
 
@@ -31,12 +35,15 @@ public class HttpModule {
 
             @Override
             public void run() {
-                IHttpClient<Response, OkHttpClient.Builder, Request> okHttpClient = new OkHttpClientImpl(
+                // 走蓝牙通道时候，或者httpMananger的独立通道时，核心入口
+                // TODO 抽出来 做适配
+                IHttpClient<Response, OkHttpClientBuilder, RequestBuilder> okHttpClient = new OkHttpClientImp(
                         context, directInvoke);
-                OkHttpClient.Builder builder = OkHttpParser.getClientBuilderFromPacket(source);
-                Request request = OkHttpParser.getRequestFromPacket(source);
-                Response response = okHttpClient.execute(builder, request);
-                OkHttpParser.onParseResponse(response, source);
+                OkHttpClientBuilder clientSetting = OkHttpRequestConvert
+                        .getClientBuilderFromPacket(source);
+                RequestBuilder request = OkHttpRequestConvert.getRequestFromPacket(source);
+                Response response = okHttpClient.execute(clientSetting, request);
+                OkHttpResponseConvert.onParseResponse(response, source);
                 callback.onCallback(source);
             }
         });

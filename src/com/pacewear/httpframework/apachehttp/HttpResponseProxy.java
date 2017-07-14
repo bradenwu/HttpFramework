@@ -4,6 +4,7 @@ package com.pacewear.httpframework.apachehttp;
 import android.text.TextUtils;
 import android.util.Base64;
 
+import com.tencent.tws.api.HttpRequestCommand;
 import com.tencent.tws.api.HttpResponseResult;
 
 import org.apache.http.Header;
@@ -39,7 +40,8 @@ public class HttpResponseProxy implements HttpResponse {
     }
 
     private void init(HttpResponseResult _result) {
-        mStatusCode = _result.mStatusCode;
+        mStatusCode = (HttpRequestCommand.NORMAL_STATUS == _result.mStatusCode) ? 200
+                : _result.mStatusCode;
         List<Header> headerList = new ArrayList<Header>();
         String extra = _result.getResponseExtra();
         if (!TextUtils.isEmpty(extra)) {

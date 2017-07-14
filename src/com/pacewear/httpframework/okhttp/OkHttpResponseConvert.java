@@ -8,6 +8,10 @@ import android.util.Log;
 import com.pacewear.httpframework.common.ByteUtil;
 import com.pacewear.httpframework.common.Constants;
 import com.pacewear.httpframework.common.FileUtil;
+import com.pacewear.httpframework.okhttp.bean.OkHttpParam;
+import com.pacewear.httpframework.okhttp.bean.RequestBuilder;
+import com.pacewear.httpframework.okhttp.bean.ResponseBodyWrap;
+import com.pacewear.httpframework.okhttp.bean.ResponseBuilder;
 import com.tencent.tws.api.HttpPackage;
 import com.tencent.tws.api.HttpRequestCommand;
 import com.tencent.tws.api.HttpRequestGeneralParams;
@@ -29,26 +33,8 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 // bt通道走正常的http请求，转换为okhttp请求
-public class OkHttpParser {
+public class OkHttpResponseConvert {
     private static final String TAG = "OkHttpUtil";
-
-    public static OkHttpClient.Builder getClientBuilderFromPacket(HttpPackage e1) {
-        Log.d(Constants.TAG, "getClientBuilderFromPacket");
-        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
-        HttpRequestGeneralParams param = HttpRequestGeneralParams
-                .StringToHttpRequestGeneralParams(e1.getHttpData());
-        RequstConvert.parseHttpParam(builder, param, param.mMaskFlag);
-        return builder;
-    }
-
-    public static Request getRequestFromPacket(HttpPackage e1) {
-        Log.d(Constants.TAG, "getRequestFromPacket");
-        HttpRequestGeneralParams param = HttpRequestGeneralParams
-                .StringToHttpRequestGeneralParams(e1.getHttpData());
-        Request.Builder requestBuilder = new Request.Builder();
-        RequstConvert.parseHttpRequest(requestBuilder, param, param.mMaskFlag);
-        return requestBuilder.build();
-    }
 
     public static String getHeadersFromPacket(Response response) {
         JSONObject json = new JSONObject();
@@ -69,6 +55,7 @@ public class OkHttpParser {
     public static void onParseResponse(Response response, HttpPackage e1) {
         if (response == null) {
             Log.e(Constants.TAG, "onParseResponse,response is null!!");
+            e1.setStatusCode(HttpRequestCommand.NETWORKFAIL_STATUS);
             return;
         }
         e1.setResponseExtra(getHeadersFromPacket(response));
@@ -99,9 +86,18 @@ public class OkHttpParser {
                 Log.d(Constants.TAG, "download");
                 onParseDownloadRsp(e1, response);
                 break;
+            case HttpRequestCommand.TRANSMIT_OKHTTP:
+                Log.d(Constants.TAG, "transmit okhttp Data");
+                e1.setHttpData(onParseOkHttpRsp(response));
+                break;
             default:
                 break;
         }
+    }
+
+    private static String onParseOkHttpRsp(Response response) {
+        OkHttpParam targetParam = new OkHttpParam(null, null, new ResponseBuilder(response));
+        return OkHttpParam.Param2Str(targetParam);
     }
 
     private static String onParseInputStream(Response response) {

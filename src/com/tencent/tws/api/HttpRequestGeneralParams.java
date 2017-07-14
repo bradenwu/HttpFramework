@@ -8,6 +8,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -45,6 +46,41 @@ public class HttpRequestGeneralParams {
 
     public HttpRequestGeneralParams() {
 
+    }
+
+    public HttpRequestGeneralParams(String totalParam, int type) {
+        requestType = type;
+        mBodyEntity = totalParam;//okHttpParam2String(totalParam, type);
+    }
+
+    public static String okHttpParam2String(String body, int requestType) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("mPackageType", requestType);
+            jsonObject.put("mHttpData", body);
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public static HttpRequestGeneralParams getOkHttpParam(String msg) {
+        HttpRequestGeneralParams params = null;
+        try {
+            JSONObject jsonObject = new JSONObject(msg);
+            int type = jsonObject.optInt("mPackageType");
+            String data = jsonObject.optString("mHttpData");
+            if (type != 0 && !TextUtils.isEmpty(data)) {
+                params = new HttpRequestGeneralParams();
+                params.setRequestType(type);
+                params.mBodyEntity = data;
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return params;
     }
 
     public void setUserAgent(String mAgent) {
@@ -118,6 +154,9 @@ public class HttpRequestGeneralParams {
     }
 
     public static String HttpRequestGeneralParamsToString(HttpRequestGeneralParams mParams) {
+        if (mParams.requestType == HttpRequestCommand.TRANSMIT_OKHTTP) {
+            return okHttpParam2String(mParams.mBodyEntity, mParams.requestType);
+        }
         JSONObject jsonObject = new JSONObject();// main object
 
         // 1.add control part

@@ -5,7 +5,9 @@ public class HttpRequestCommand {
 	public static final int POST = 0x00010001;
 	public static final int POST_WITH_STRAMRETURN = 0x00010002;
 	public static final int POST_WITH_GENERAL = 0x00010003;
-	
+	//special command
+	public static final int TRANSMIT_OKHTTP = 0x00010004;
+
 	public static final int GET_TEXT = 0x00020001;
 	public static final int GET_PNG_IMAGE = 0x00020002;
 	public static final int GET_JPG_IMAGE = 0x00020003;

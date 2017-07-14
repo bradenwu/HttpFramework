@@ -2,6 +2,7 @@
 package com.pacewear.httpframework.channel;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.pacewear.httpframework.core.IHttpRequestAction;
 import com.tencent.tws.api.HttpManager;
@@ -14,6 +15,7 @@ import java.util.concurrent.Semaphore;
 public class BlueToothChannel<Rsp, Param, Post> implements IHttpProxyChannel<Rsp, Param, Post> {
     private IHttpRequestAction<Rsp, Param, Post> mClientAction = null;
     private Context mContext = null;
+    private static final String TAG = "BlueToothChannel";
 
     public BlueToothChannel(Context context) {
         mContext = context;
@@ -25,7 +27,7 @@ public class BlueToothChannel<Rsp, Param, Post> implements IHttpProxyChannel<Rsp
             return null;
         }
         HttpRequestGeneralParams request = mClientAction.prepareRequest(param, post);
-        HttpResponseResult httpResponseWrap = transmit(request);
+        HttpResponseResult httpResponseWrap = transmitInternal(request);
         return mClientAction.parseResponse(httpResponseWrap);
     }
 
@@ -34,18 +36,22 @@ public class BlueToothChannel<Rsp, Param, Post> implements IHttpProxyChannel<Rsp
         mClientAction = action;
     }
 
-    private HttpResponseResult transmit(HttpRequestGeneralParams request) {
+    private HttpResponseResult transmitInternal(HttpRequestGeneralParams request) {
         final SemaphoreController controller = new SemaphoreController();
         HttpManager.getInstance(mContext).postGeneralHttpRequest(request,
                 new HttpResponseListener() {
 
                     @Override
                     public void onResponse(HttpResponseResult mResult) {
+                        Log.d(TAG, "curThread:" + Thread.currentThread().getName() + ",onResponse :"
+                                + mResult.mData);
                         controller.releaseResult(0, mResult);
                     }
 
                     @Override
                     public void onError(int statusCode, HttpResponseResult mResult) {
+                        Log.d(TAG, "curThread:" + Thread.currentThread().getName() + ",onError :"
+                                + mResult.mData);
                         controller.releaseResult(statusCode, mResult);
                     }
                 });
@@ -62,12 +68,14 @@ public class BlueToothChannel<Rsp, Param, Post> implements IHttpProxyChannel<Rsp
         }
 
         public HttpResponseResult waitResult() {
+            Log.d(TAG, "curThread:" + Thread.currentThread().getName() + "waitResult here!");
             try {
                 mSemaphore.acquire();
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            Log.d(TAG, "curThread:" + Thread.currentThread().getName() + "waitResult complete!");
             return mResult;
         }
 

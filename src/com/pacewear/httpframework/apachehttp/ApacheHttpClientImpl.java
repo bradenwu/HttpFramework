@@ -3,6 +3,7 @@ package com.pacewear.httpframework.apachehttp;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import com.pacewear.httpframework.common.ByteUtil;
 import com.pacewear.httpframework.core.BaseHttpClient;
@@ -82,13 +83,13 @@ public class ApacheHttpClientImpl
                 target.addHeader(header.getName(), header.getValue());
             }
         }
-        target.addHeader("Connection", "close");//okhttp此次设置Connection为close
+        target.addHeader("Connection", "close");// okhttp此次设置Connection为close
         HttpEntity entity = request.getEntity();
         try {
             if (entity instanceof ByteArrayEntity) {
                 byte[] body = EntityUtils.toByteArray(entity);
                 // StringEntity or ByteArrayEntitiy
-                target.addBodyEntity(ByteUtil.toHexString(body));
+                target.addBodyEntity(Base64.encodeToString(body, Base64.DEFAULT));
             } else if (entity instanceof StringEntity) {
                 // TODO 这里需要解析StringEntity
             }

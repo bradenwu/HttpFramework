@@ -3,10 +3,14 @@ package com.pacewear.httpframework.common;
 
 import android.text.TextUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 
 public class ByteUtil {
     private static final int BUF_SIZE = 4096;
@@ -86,6 +90,7 @@ public class ByteUtil {
         return rt;
     }
 
+    //
     public static String toHex(int n) {
         StringBuilder sb = new StringBuilder();
         if (n / 16 == 0) {
@@ -106,6 +111,7 @@ public class ByteUtil {
         return sb.toString();
     }
 
+    //
     public static int toInt(byte[] b, int s, int n) {
         int ret = 0;
 
@@ -143,5 +149,38 @@ public class ByteUtil {
             } catch (IOException e) {
             }
         }
+    }
+
+    public static String Obj2Str(Object obj) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream os = new ObjectOutputStream(bos);
+            os.writeObject(obj);
+            return ByteUtil.toHexString(bos.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Object Str2Obj(String content) {
+        if (TextUtils.isEmpty(content)) {
+            return null;
+        }
+        byte[] stringToBytes = ByteUtil.toByteArray(content);
+        ByteArrayInputStream bis = new ByteArrayInputStream(stringToBytes);
+        ObjectInputStream is;
+        Object readObject = null;
+        try {
+            is = new ObjectInputStream(bis);
+            readObject = is.readObject();
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return readObject;
     }
 }
