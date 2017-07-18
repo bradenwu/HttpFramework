@@ -52,7 +52,7 @@ public class CmdProxy {
         mHttpIntercept.setClientBultInHanlder(hanlder);
     }
 
-    public void invoke(int cmd, JceStruct data, ICmdSendCallback callback) {
+    public void send(int cmd, JceStruct data, ICmdSendCallback callback) {
         if (mHttpIntercept.intercept(data)) {
             Log.d(TAG, "do not intercept");
             return;

@@ -22,7 +22,7 @@ import okhttp3.Response;
 
 public class OkHttpClientImp
         extends BaseHttpClient<Response, OkHttpClientBuilder, RequestBuilder> {
-
+    private static OkHttpClient mClient = null;
     public OkHttpClientImp(Context context) {
         super(context);
     }
@@ -50,7 +50,8 @@ public class OkHttpClientImp
         Request request = RequestBuilder.toRequest_Builder(_post);
         Response response = null;
         try {
-            response = clientBuilder.build().newCall(request).execute();
+            mClient = clientBuilder.build();
+            response = mClient.newCall(request).execute();
         } catch (IOException e) {
             Log.e(Constants.TAG, "client execute error!");
             e.printStackTrace();
